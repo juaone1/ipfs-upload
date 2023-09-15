@@ -4,11 +4,7 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const fs = require("fs");
 
-const ipfs = ipfsClient.create({
-  host: "localhost",
-  port: "5001",
-  protocol: "http",
-});
+const ipfs = ipfsClient.create("http://107.150.48.202");
 
 const app = express();
 
@@ -17,10 +13,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 app.get("/upload", (req, res) => {
+  console.log("upload here");
   res.render("home");
 });
 
 app.post("/upload/upload-file", (req, res) => {
+  console.log("upload-file here");
   const file = req.files.file;
   const fileName = req.body.fileName;
   const filePath = "files/" + fileName;
