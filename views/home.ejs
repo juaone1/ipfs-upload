@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload File</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: rgb(200, 226, 255);
+        font-family: 'Poppins', sans-serif;
+        flex-direction: column;
+      }
+
+      .drag-area {
+        border: 2px dashed #fff;
+        height: 400px;
+        width: 600px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .drag-area.active {
+        border: 2px solid #fff;
+      }
+
+      .drag-area .icon {
+        font-size: 100px;
+        color: #fff;
+      }
+
+      .drag-area header {
+        font-size: 30px;
+        font-weight: 500;
+      }
+
+      .drag-area span {
+        font-size: 25px;
+        font-weight: 500;
+        color: #fff;
+        margin: 10px 0 15px 0;
+      }
+
+      .drag-area button {
+        padding: 10px 25px;
+        font-size: 20px;
+        font-weight: 500;
+        border: none;
+        outline: none;
+        background: #fff;
+        color: rgb(200, 226, 255);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+    .selected-files {
+      display: none;
+      width: 60%;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 15px;
+      list-style: none; /* Remove dot symbol */
+    }
+
+    .selected-files li {
+      font-size: 18px;
+      padding: 5px 0;
+    }
+
+    .upload-file {
+        padding: 10px 25px;
+        font-size: 20px;
+        font-weight: 500;
+        border: none;
+        outline: none;
+        background: rgb(114, 176, 247);
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <h1>Upload file to IPFS</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <label> Filename</label>
+      <input type="text" name="fileName" />
+      <br /><br />
+      <label> Upload file </label>
+      <input type="file" name="file" />
+      <br /><br />
+      <input type="submit" value="Submit" />
+    </form> -->
+    <h1> UPLOAD FILE TO IPFS </h1>
+    
+    <div class="drag-area">
+      <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <header>Drag & Drop to Upload File</header>
+      <span> OR </span>
+      <button id="browseButton">Browse File</button>
+      <input type="file" id="fileInput" style="display: none;" />
+
+      <ul class="selected-files" id="fileList"></ul>
+    </div>
+
+    <button class="upload-file" id="uploadButton">Upload File</button>
+
+    <div id="fileHashContainer"></div>
+
+    <script>
+      const browseButton = document.getElementById('browseButton');
+      const fileInput = document.getElementById('fileInput');
+      const fileList = document.getElementById('fileList');
+      const uploadButton = document.getElementById('uploadButton');
+
+      browseButton.addEventListener('click', () => {
+        fileInput.click(); 
+      });
+
+      fileInput.addEventListener('change', () => {
+        // Handle the selected file here (e.g., display its name)
+        fileList.innerHTML = '';
+
+        const selectedFiles = fileInput.files;
+        if (selectedFiles.length > 0) {
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${selectedFiles[i].name}`;
+            fileList.appendChild(listItem);
+          }
+
+          fileList.style.display = 'block';
+        } else {
+          const listItem = document.createElement('li');
+          listItem.textContent = 'No files selected.';
+          fileList.appendChild(listItem);
+          fileList.style.display = 'none';
+        }
+                
+      });
+
+      uploadButton.addEventListener('click', () => {
+  // Check if there are selected files
+  const selectedFiles = fileInput.files;
+  if (selectedFiles.length > 0) {
+    // Create a FormData object to send the selected files
+    const formData = new FormData();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append('file', selectedFiles[i]);
+    }
+    formData.append('fileName', selectedFiles[0].name); // Assuming you want to use the name of the first selected file as the fileName
+
+    // Send a POST request to the /upload endpoint
+    fetch('/upload', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // Parse the response as JSON
+        } else {
+          console.error('Server returned an error:', response.status);
+          alert('An error occurred while uploading the file.');
+          throw new Error('File upload failed');
+        }
+      })
+      .then((data) => {
+        // Extract the file hash from the JSON response
+        const fileHash = data.hash.toString();
+        console.log(fileHash);
+
+        // Display the file hash as a link to the IPFS content
+        const fileHashContainer = document.getElementById('fileHashContainer');
+        const linkElement = document.createElement('a');
+        linkElement.href = `http://107.150.48.202/ipfs/${fileHash}`;
+        linkElement.textContent = `View IPFS Content`;
+        fileHashContainer.innerHTML = ''; // Clear previous content
+        fileHashContainer.appendChild(linkElement);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+        }
+      });
+    </script>
+  </div>
+  </body>
+</html>
