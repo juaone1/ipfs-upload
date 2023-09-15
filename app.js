@@ -16,11 +16,11 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
-app.get("/", (req, res) => {
+app.get("/upload", (req, res) => {
   res.render("home");
 });
 
-app.post("/upload", (req, res) => {
+app.post("/upload/upload-file", (req, res) => {
   const file = req.files.file;
   const fileName = req.body.fileName;
   const filePath = "files/" + fileName;
@@ -44,8 +44,6 @@ app.post("/upload", (req, res) => {
     const jsonResponse = { hash: fileHash };
 
     console.log("jsonResponse", jsonResponse);
-
-    // Send the JSON response
     res.json(jsonResponse);
   });
 });

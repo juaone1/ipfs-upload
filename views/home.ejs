@@ -83,7 +83,7 @@
       border-radius: 6px;
       padding: 10px;
       margin-top: 15px;
-      list-style: none; /* Remove dot symbol */
+      list-style: none; 
     }
 
     .selected-files li {
@@ -143,7 +143,6 @@
       });
 
       fileInput.addEventListener('change', () => {
-        // Handle the selected file here (e.g., display its name)
         fileList.innerHTML = '';
 
         const selectedFiles = fileInput.files;
@@ -165,18 +164,18 @@
       });
 
       uploadButton.addEventListener('click', () => {
-  // Check if there are selected files
+
   const selectedFiles = fileInput.files;
   if (selectedFiles.length > 0) {
-    // Create a FormData object to send the selected files
+
     const formData = new FormData();
     for (let i = 0; i < selectedFiles.length; i++) {
       formData.append('file', selectedFiles[i]);
     }
-    formData.append('fileName', selectedFiles[0].name); // Assuming you want to use the name of the first selected file as the fileName
+    formData.append('fileName', selectedFiles[0].name); 
 
     // Send a POST request to the /upload endpoint
-    fetch('/upload', {
+    fetch('/upload/upload-file', {
       method: 'POST',
       body: formData,
     })
